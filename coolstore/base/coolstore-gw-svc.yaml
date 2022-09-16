@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: coolstore-gw
+    demo: coolstore-microservice
+    hystrix.enabled: "true"
+    template: coolstore
+  name: coolstore-gw
+spec:
+  ports:
+  - port: 8080
+  selector:
+    deploymentconfig: coolstore-gw

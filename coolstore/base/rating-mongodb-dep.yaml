@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rating
+    comp-type: database
+    demo: coolstore-microservice
+    template: coolstore
+  name: rating-mongodb
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      deploymentconfig: rating-mongodb
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      post:
+        execNewPod:
+          command:
+          - /bin/sh
+          - -i
+          - -c
+          - env && while ! mongo ${RATING_MONGODB_SERVICE_HOST}:27017/$MONGODB_DATABASE
+            -u $MONGODB_USER -p $MONGODB_PASSWORD --eval="$MONGODB_INIT" > /dev/null
+            2>&1; do echo "waiting for mongo ..."; sleep 5; done
+          containerName: rating-mongodb
+          env:
+          - name: MONGODB_INIT
+            value: db.ratings.insert({"_id":"329299","itemId":"329299","rating":5.0,"count":1});
+              db.ratings.insert({"_id":"329199","itemId":"329199","rating":1.0,"count":12});
+              db.ratings.insert({"_id":"165613","itemId":"165613","rating":2.3,"count":31});
+              db.ratings.insert({"_id":"165614","itemId":"165614","rating":3.0,"count":51});
+              db.ratings.insert({"_id":"165954","itemId":"165954","rating":4.0,"count":66});
+              db.ratings.insert({"_id":"444434","itemId":"444434","rating":5.0,"count":76});
+              db.ratings.insert({"_id":"444435","itemId":"444435","rating":4.0,"count":83});
+              db.ratings.insert({"_id":"444436","itemId":"444436","rating":3.0,"count":123});
+        failurePolicy: ignore
+      timeoutSeconds: 600
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: rating
+        comp-type: database
+        deploymentconfig: rating-mongodb
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: MONGODB_USER
+          value: userLhK
+        - name: MONGODB_PASSWORD
+          value: 0HoBQnY4
+        - name: MONGODB_DATABASE
+          value: ratingdb
+        - name: MONGODB_ADMIN_PASSWORD
+          value: 0HoBQnY4
+        image: registry.redhat.io/rhscl/mongodb-32-rhel7
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 10
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 27017
+          timeoutSeconds: 1
+        name: rating-mongodb
+        ports:
+        - containerPort: 27017
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -i
+            - -c
+            - mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD
+              --eval="quit()"
+          failureThreshold: 10
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: 512Mi
+        securityContext:
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/mongodb/data
+          name: mongodb-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: mongodb-data

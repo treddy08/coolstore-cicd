@@ -1,0 +1,20 @@
+apiVersion: v1
+data:
+  review-config.yml: |-
+    project:
+      stage: production
+    swarm:
+      datasources:
+        data-sources:
+          ReviewDS:
+            driver-name: postgresql
+            connection-url: jdbc:postgresql://review-postgresql:5432/review
+            user-name: userKsD
+            password: LcwIxx1t
+kind: ConfigMap
+metadata:
+  labels:
+    app: review
+    demo: coolstore-microservice
+    template: coolstore
+  name: review-config

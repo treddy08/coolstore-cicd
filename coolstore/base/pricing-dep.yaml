@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    demo: coolstore-microservice
+    template: coolstore
+  name: pricing
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      deploymentconfig: pricing
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        application: pricing
+        deploymentconfig: pricing
+      name: pricing
+    spec:
+      containers:
+      - env:
+        - name: MQ_CLUSTER_PASSWORD
+          value: 7mzX0pLV03
+        - name: JGROUPS_CLUSTER_PASSWORD
+          value: CqUo3fYDTv
+        - name: AUTO_DEPLOY_EXPLODED
+          value: "false"
+        - name: KIE_CONTAINER_DEPLOYMENT
+          value: CoolStoreRulesContainer=com.redhat:coolstore:2.0.0
+        - name: KIE_SERVER_USER
+          value: brmsAdmin
+        - name: KIE_SERVER_PASSWORD
+          value: vLcfkx3!
+        - name: OPENSHIFT_KUBE_PING_LABELS
+          value: application=pricing-service
+        - name: OPENSHIFT_KUBE_PING_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: image-registry.openshift-image-registry.svc:5000/coolstore/pricing
+        imagePullPolicy: Always
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /opt/eap/bin/jboss-cli.sh
+              - -c
+              - :shutdown(timeout=60)
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /kie-server/docs/
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: pricing
+        ports:
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8888
+          name: ping
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /kie-server/docs/
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: 600Mi
+          requests:
+            memory: 200Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 75

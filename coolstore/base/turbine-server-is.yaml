@@ -1,0 +1,24 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/image.dockerRepositoryCheck: "2022-09-16T07:17:56Z"
+  labels:
+    app: netflix
+    component: turbine-server
+    demo: coolstore-microservice
+    template: coolstore
+  name: turbine-server
+spec:
+  dockerImageRepository: quay.io/redhat-gpte/turbine-server
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations: null
+    from:
+      kind: DockerImage
+      name: quay.io/redhat-gpte/turbine-server:latest
+    generation: 2
+    name: latest
+    referencePolicy:
+      type: Source

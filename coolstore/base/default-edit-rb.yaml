@@ -1,0 +1,15 @@
+apiVersion: authorization.openshift.io/v1
+groupNames: null
+kind: RoleBinding
+metadata:
+  labels:
+    demo: coolstore-microservice
+    template: coolstore
+  name: default_edit
+roleRef:
+  name: view
+subjects:
+- kind: ServiceAccount
+  name: default
+userNames:
+- system:serviceaccount:coolstore:default

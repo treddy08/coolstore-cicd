@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.openshift.io/dependencies: '[{"name":"catalog-mongodb","namespace":"","kind":"Service"}]'
+  labels:
+    app: catalog
+    demo: coolstore-microservice
+    template: coolstore
+  name: catalog
+spec:
+  ports:
+  - port: 8080
+  selector:
+    deploymentconfig: catalog

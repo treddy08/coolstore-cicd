@@ -1,0 +1,150 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    application: sso
+    template: sso-service
+    xpaas: 1.3.2
+  name: sso
+  namespace: ci
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      deploymentConfig: sso
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        application: sso
+        deploymentConfig: sso
+      name: sso
+    spec:
+      containers:
+      - env:
+        - name: OPENSHIFT_KUBE_PING_LABELS
+          value: application=sso
+        - name: OPENSHIFT_KUBE_PING_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: HTTPS_KEYSTORE_DIR
+          value: /etc/eap-secret-volume
+        - name: HTTPS_KEYSTORE
+          value: keystore.jks
+        - name: HTTPS_KEYSTORE_TYPE
+          value: JKS
+        - name: HTTPS_NAME
+          value: jboss
+        - name: HTTPS_PASSWORD
+          value: mykeystorepass
+        - name: JGROUPS_ENCRYPT_SECRET
+          value: sso-app-secret
+        - name: JGROUPS_ENCRYPT_KEYSTORE_DIR
+          value: /etc/jgroups-encrypt-secret-volume
+        - name: JGROUPS_ENCRYPT_KEYSTORE
+          value: jgroups.jceks
+        - name: JGROUPS_ENCRYPT_NAME
+          value: secret-key
+        - name: JGROUPS_ENCRYPT_PASSWORD
+          value: password
+        - name: JGROUPS_CLUSTER_PASSWORD
+          value: password
+        - name: SSO_ADMIN_USERNAME
+          value: admin
+        - name: SSO_ADMIN_PASSWORD
+          value: coolstore
+        - name: SSO_REALM
+          value: coolstore
+        - name: DB_JNDI
+          value: java:jboss/datasources/KeycloakDS
+        - name: DB_USERNAME
+          value: coolstore
+        - name: DB_PASSWORD
+          value: coolstore
+        - name: DB_DATABASE
+          value: coolstore
+        - name: DB_SERVICE_PREFIX_MAPPING
+          value: sso-postgresql=DB
+        - name: TX_DATABASE_PREFIX_MAPPING
+          value: sso-postgresql=DB
+        image: image-registry.openshift-image-registry.svc:5000/ci/sso
+        imagePullPolicy: Always
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /opt/eap/bin/jboss-cli.sh
+              - -c
+              - :shutdown(timeout=60)
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - /opt/eap/bin/livenessProbe.sh
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: sso
+        ports:
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        - containerPort: 8888
+          name: ping
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - /opt/eap/bin/readinessProbe.sh
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/eap-secret-volume
+          name: eap-keystore-volume
+          readOnly: true
+        - mountPath: /etc/jgroups-encrypt-secret-volume
+          name: eap-jgroups-keystore-volume
+          readOnly: true
+        - mountPath: /etc/sso-secret-volume
+          name: sso-truststore-volume
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      serviceAccount: sso-service-account
+      serviceAccountName: sso-service-account
+      terminationGracePeriodSeconds: 75
+      volumes:
+      - name: eap-keystore-volume
+        secret:
+          defaultMode: 420
+          secretName: sso-app-secret
+      - name: eap-jgroups-keystore-volume
+        secret:
+          defaultMode: 420
+          secretName: sso-app-secret
+      - name: sso-truststore-volume
+        secret:
+          defaultMode: 420
+          secretName: sso-app-secret

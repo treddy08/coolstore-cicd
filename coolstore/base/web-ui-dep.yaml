@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: web-ui
+    demo: coolstore-microservice
+    template: coolstore
+  name: web-ui
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: web-ui
+      deploymentconfig: web-ui
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: web-ui
+        deploymentconfig: web-ui
+    spec:
+      containers:
+      - env:
+        - name: COOLSTORE_GW_SERVICE
+          value: coolstore-gw
+        - name: HOSTNAME_HTTP
+          value: 'web-ui:8080'
+        - name: SSO_URL
+          value: >-
+            https://secure-sso-ci.apps.cluster-b28bp-1.sandbox372.opentlc.com/auth
+        - name: SSO_CLIENT_ID
+          value: coolstore-web-ui
+        - name: SSO_REALM
+          value: coolstore
+        image: image-registry.openshift-image-registry.svc:5000/coolstore/web-ui
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: web-ui
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+

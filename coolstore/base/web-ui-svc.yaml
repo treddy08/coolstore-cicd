@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: web-ui
+    demo: coolstore-microservice
+    template: coolstore
+  name: web-ui
+spec:
+  ports:
+  - name: 8080-tcp
+    port: 8080
+  selector:
+    deploymentconfig: web-ui

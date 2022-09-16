@@ -1,0 +1,23 @@
+kind: BuildConfig
+apiVersion: v1
+metadata:
+  labels:
+    build: sso
+  name: sso
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: sso:latest
+  source:
+    contextDir: sso-service
+    git:
+      ref: stable-ocp-3.11
+      uri: https://github.com/redhat-gpte-devopsautomation/coolstore-microservice.git
+    type: Git
+  strategy:
+    dockerStrategy: {}
+    type: Docker
+  triggers:
+  - type: ConfigChange
+  - type: ImageChange

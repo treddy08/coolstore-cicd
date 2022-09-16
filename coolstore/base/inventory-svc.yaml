@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.openshift.io/dependencies: '[{"name":"inventory-postgresql","namespace":"","kind":"Service"}]'
+  labels:
+    app: inventory
+    demo: coolstore-microservice
+    template: coolstore
+  name: inventory
+spec:
+  ports:
+  - port: 8080
+  selector:
+    deploymentconfig: inventory

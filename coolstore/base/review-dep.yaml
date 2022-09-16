@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: review
+    demo: coolstore-microservice
+    template: coolstore
+  name: review
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      deploymentconfig: review
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: review
+        deploymentconfig: review
+      name: review
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: JAVA_OPTIONS
+          value: -Dswarm.project.stage=production -Dswarm.project.stage.file=file:///app/config/review-config.yml
+            -Xms256m -Xmx1024m
+        - name: GC_MAX_METASPACE_SIZE
+          value: "1024"
+        - name: GC_METASPACE_SIZE
+          value: "256"
+        image: image-registry.openshift-image-registry.svc:5000/coolstore/review
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: review
+        ports:
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            memory: 200Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /app/config
+          name: config
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 75
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: review-config.yml
+            path: review-config.yml
+          name: review-config
+        name: config

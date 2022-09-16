@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.openshift.io/dependencies: '[{"name":"turbine-server","namespace":"","kind":"Service"}]'
+  labels:
+    app: netflix
+    component: hystrix-dashboard
+    demo: coolstore-microservice
+    template: coolstore
+  name: hystrix-dashboard
+spec:
+  ports:
+  - name: 8080-tcp
+    port: 8080
+  selector:
+    app: netflix
+    component: hystrix-dashboard
+    deploymentconfig: hystrix-dashboard

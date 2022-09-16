@@ -1,0 +1,15 @@
+namespace: ci
+resources:
+- secure-sso-rt.yaml
+- secure-sso-svc.yaml
+- sso-app-secret-sct.yaml
+- sso-bc.yaml
+- sso-config-client-pod.yaml
+- sso-config-files-cm.yaml
+- sso-dep.yaml
+- sso-is.yaml
+- sso-postgresql-dep.yaml
+- sso-postgresql-svc.yaml
+- sso-rt.yaml
+- sso-service-account-sa.yaml
+- sso-svc.yaml

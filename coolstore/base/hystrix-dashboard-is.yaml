@@ -1,0 +1,26 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/image.dockerRepositoryCheck: "2022-09-16T07:17:56Z"
+  labels:
+    app: netflix
+    component: hystrix-dashboard
+    demo: coolstore-microservice
+    template: coolstore
+  name: hystrix-dashboard
+spec:
+  dockerImageRepository: docker.io/siamaksade/hystrix-dashboard
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations:
+      description: Fabric8 Hystrix Dashboard
+      version: 1.0.27
+    from:
+      kind: DockerImage
+      name: docker.io/siamaksade/hystrix-dashboard:1.0.27
+    generation: 2
+    name: 1.0.27
+    referencePolicy:
+      type: Source

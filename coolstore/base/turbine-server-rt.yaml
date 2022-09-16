@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+  labels:
+    app: netflix
+    component: turbine-server
+    demo: coolstore-microservice
+    template: coolstore
+  name: turbine-server
+spec:
+  host: turbine-server-coolstore.apps.cluster-b28bp-1.sandbox372.opentlc.com
+  port:
+    targetPort: 8080-tcp
+  to:
+    kind: Service
+    name: turbine-server
+    weight: 100
+  wildcardPolicy: None

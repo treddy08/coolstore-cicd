@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    description: Route for application's http service.
+    openshift.io/host.generated: "true"
+  labels:
+    application: sso
+    template: sso-service
+    xpaas: 1.3.2
+  name: sso
+  namespace: ci
+spec:
+  to:
+    kind: Service
+    name: sso
+    weight: 100
+  wildcardPolicy: None

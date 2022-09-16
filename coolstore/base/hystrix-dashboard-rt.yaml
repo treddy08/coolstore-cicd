@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+  labels:
+    app: netflix
+    component: hystrix-dashboard
+    demo: coolstore-microservice
+    template: coolstore
+  name: hystrix-dashboard
+spec:
+  host: hystrix-dashboard-coolstore.apps.cluster-b28bp-1.sandbox372.opentlc.com
+  port:
+    targetPort: 8080-tcp
+  to:
+    kind: Service
+    name: hystrix-dashboard
+    weight: 100
+  wildcardPolicy: None

@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  rating-config.yaml: |-
+    rating.http.port: 8080
+    connection_string: mongodb://rating-mongodb:27017
+    db_name: ratingdb
+    username: userLhK
+    password: 0HoBQnY4
+kind: ConfigMap
+metadata:
+  labels:
+    app: rating
+    demo: coolstore-microservice
+    template: coolstore
+  name: rating-config
