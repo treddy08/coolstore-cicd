@@ -13,7 +13,6 @@ spec:
     matchLabels:
       deploymentconfig: rating
   strategy:
-    resources: {}
     type: Recreate
   template:
     metadata:
