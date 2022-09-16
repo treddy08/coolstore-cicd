@@ -8,7 +8,6 @@ metadata:
     template: coolstore
   name: web-ui
 spec:
-  host: web-ui-coolstore.apps.cluster-b28bp-1.sandbox372.opentlc.com
   to:
     kind: Service
     name: web-ui

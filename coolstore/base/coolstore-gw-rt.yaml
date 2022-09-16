@@ -9,7 +9,6 @@ metadata:
     template: coolstore
   name: coolstore-gw
 spec:
-  host: coolstore-gw-coolstore.apps.cluster-b28bp-1.sandbox372.opentlc.com
   to:
     kind: Service
     name: coolstore-gw

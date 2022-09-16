@@ -10,7 +10,6 @@ metadata:
     template: coolstore
   name: turbine-server
 spec:
-  host: turbine-server-coolstore.apps.cluster-b28bp-1.sandbox372.opentlc.com
   port:
     targetPort: 8080-tcp
   to:
