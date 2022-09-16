@@ -15,8 +15,6 @@ spec:
     matchLabels:
       deploymentConfig: sso-postgresql
   strategy:
-    recreateParams:
-      timeoutSeconds: 600
     type: Recreate
   template:
     metadata:

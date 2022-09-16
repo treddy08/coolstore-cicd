@@ -14,8 +14,6 @@ spec:
     matchLabels:
       deploymentConfig: sso
   strategy:
-    recreateParams:
-      timeoutSeconds: 600
     type: Recreate
   template:
     metadata:
