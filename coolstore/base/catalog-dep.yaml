@@ -13,9 +13,6 @@ spec:
     matchLabels:
       deploymentconfig: catalog
   strategy:
-    activeDeadlineSeconds: 21600
-    recreateParams:
-      timeoutSeconds: 600
     type: Recreate
   template:
     metadata:

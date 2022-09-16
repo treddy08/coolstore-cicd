@@ -13,9 +13,6 @@ spec:
     matchLabels:
       deploymentconfig: coolstore-gw
   strategy:
-    activeDeadlineSeconds: 21600
-    recreateParams:
-      timeoutSeconds: 600
     resources: {}
     type: Recreate
   template:

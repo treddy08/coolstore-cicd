@@ -14,7 +14,6 @@ spec:
     matchLabels:
       deploymentconfig: rating-mongodb
   strategy:
-    activeDeadlineSeconds: 21600
     recreateParams:
       post:
         execNewPod:
@@ -37,7 +36,6 @@ spec:
               db.ratings.insert({"_id":"444435","itemId":"444435","rating":4.0,"count":83});
               db.ratings.insert({"_id":"444436","itemId":"444436","rating":3.0,"count":123});
         failurePolicy: ignore
-      timeoutSeconds: 600
     type: Recreate
   template:
     metadata:

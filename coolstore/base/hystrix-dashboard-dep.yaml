@@ -16,13 +16,9 @@ spec:
       component: hystrix-dashboard
       deploymentconfig: hystrix-dashboard
   strategy:
-    activeDeadlineSeconds: 21600
-    recreateParams:
-      timeoutSeconds: 600
     type: Recreate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: netflix
         component: hystrix-dashboard

@@ -13,13 +13,9 @@ spec:
     matchLabels:
       deploymentconfig: inventory
   strategy:
-    activeDeadlineSeconds: 21600
-    recreateParams:
-      timeoutSeconds: 600
     type: Recreate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: inventory
         deploymentconfig: inventory
