@@ -1,29 +1,23 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   labels:
     app: rating
     comp-type: database
-    demo: coolstore-microservice
-    template: coolstore
   name: rating-mongodb
 spec:
   replicas: 1
-  revisionHistoryLimit: 10
   selector:
-    matchLabels:
-      deploymentconfig: rating-mongodb
+    deploymentconfig: rating-mongodb
   strategy:
     recreateParams:
       post:
         execNewPod:
           command:
-          - /bin/sh
-          - -i
-          - -c
-          - env && while ! mongo ${RATING_MONGODB_SERVICE_HOST}:27017/$MONGODB_DATABASE
-            -u $MONGODB_USER -p $MONGODB_PASSWORD --eval="$MONGODB_INIT" > /dev/null
-            2>&1; do echo "waiting for mongo ..."; sleep 5; done
+            - /bin/sh
+            - -i
+            - -c
+            - env && while ! mongo ${RATING_MONGODB_SERVICE_HOST}:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD --eval="$MONGODB_INIT" > /dev/null 2>&1; do echo "waiting for mongo ..."; sleep 5; done
           containerName: rating-mongodb
           env:
           - name: MONGODB_INIT
@@ -36,10 +30,11 @@ spec:
               db.ratings.insert({"_id":"444435","itemId":"444435","rating":4.0,"count":83});
               db.ratings.insert({"_id":"444436","itemId":"444436","rating":3.0,"count":123});
         failurePolicy: ignore
+      timeoutSeconds: 600
+    resources: {}
     type: Recreate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: rating
         comp-type: database
@@ -60,7 +55,7 @@ spec:
           value: ratingdb
         - name: MONGODB_ADMIN_PASSWORD
           value: 0HoBQnY4
-        image: registry.redhat.io/rhscl/mongodb-32-rhel7
+        image: mongodb
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 10
@@ -91,15 +86,28 @@ spec:
           limits:
             memory: 512Mi
         securityContext:
+          capabilities: {}
           privileged: false
         terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /var/lib/mongodb/data
           name: mongodb-data
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      schedulerName: default-scheduler
+      securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: mongodb-data
+      - emptyDir: {}
+        name: mongodb-data
+  test: false
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - rating-mongodb
+      from:
+        kind: ImageStreamTag
+        name: mongodb:3.2
+        namespace: ${IMAGE_STREAM_NAMESPACE}
+    type: ImageChange
+  - type: ConfigChange

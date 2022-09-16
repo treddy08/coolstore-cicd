@@ -13,7 +13,6 @@ spec:
     matchLabels:
       deploymentconfig: coolstore-gw
   strategy:
-    resources: {}
     type: Recreate
   template:
     metadata:
